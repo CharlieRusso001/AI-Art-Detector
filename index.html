@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Art Detection System - Technical Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            --secondary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --accent-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark-bg: #0a0e27;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: rgba(148, 163, 184, 0.1);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.8;
+            color: var(--text-primary);
+            background: var(--dark-bg);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(250, 112, 154, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+            background: transparent;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            padding: 100px 60px 80px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--primary-gradient);
+            opacity: 0.05;
+            z-index: -1;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            margin-bottom: 24px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            color: var(--text-secondary);
+            font-weight: 400;
+            letter-spacing: 0.01em;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .content {
+            padding: 80px 60px;
+        }
+
+        section {
+            margin-bottom: 100px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-top: 80px;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 3px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+        h3 {
+            color: var(--text-primary);
+            margin-top: 50px;
+            margin-bottom: 24px;
+            font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        p {
+            margin-bottom: 24px;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.9;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-left: 40px;
+            margin-bottom: 32px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+            line-height: 1.9;
+        }
+
+        code {
+            background: rgba(102, 126, 234, 0.15);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+            color: #a78bfa;
+            font-size: 0.9em;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            font-weight: 500;
+        }
+
+        pre {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            padding: 32px;
+            border-radius: 16px;
+            overflow-x: auto;
+            margin: 32px 0;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        pre:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl), var(--shadow-glow);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        pre::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 16px 0 0 16px;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+            border: none;
+            font-size: 0.95em;
+            line-height: 1.8;
+            font-weight: 400;
+        }
+
+        .code-explanation {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+            backdrop-filter: blur(10px);
+            padding: 28px;
+            border-radius: 16px;
+            margin: 24px 0 40px 0;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .code-explanation:hover {
+            transform: translateX(4px);
+            border-color: rgba(34, 197, 94, 0.4);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .code-explanation::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #22c55e 0%, #10b981 100%);
+            border-radius: 16px 0 0 16px;
+        }
+
+        .code-explanation p {
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+
+        .code-explanation strong {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .image-container {
+            text-align: center;
+            margin: 60px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-xl);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 0;
+        }
+
+        .image-container:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl), var(--shadow-glow);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .image-container:hover::before {
+            opacity: 0.05;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin: 20px 0;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s ease;
+        }
+
+        .image-container:hover img {
+            transform: scale(1.02);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .image-container p {
+            margin-top: 28px;
+            color: var(--text-muted);
+            text-align: center;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+
+        .graph-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 32px;
+            margin: 60px 0;
+        }
+
+        .graph-item {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+            backdrop-filter: blur(20px);
+            padding: 32px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .graph-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .graph-item:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(102, 126, 234, 0.4);
+            box-shadow: var(--shadow-xl), var(--shadow-glow);
+        }
+
+        .graph-item:hover::before {
+            transform: scaleX(1);
+        }
+
+        .graph-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s ease;
+        }
+
+        .graph-item:hover img {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .graph-item h4 {
+            margin-top: 24px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .graph-item p {
+            margin-top: 12px;
+            color: var(--text-muted);
+            font-size: 0.95em;
+        }
+
+        .feature-box {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            margin: 32px 0;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-box::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-gradient);
+            transform: scaleY(0);
+            transition: transform 0.4s ease;
+        }
+
+        .feature-box:hover {
+            transform: translateX(8px);
+            box-shadow: var(--shadow-xl);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .feature-box:hover::before {
+            transform: scaleY(1);
+        }
+
+        .feature-box h3 {
+            margin-top: 0;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            backdrop-filter: blur(10px);
+            color: #a78bfa;
+            border-radius: 8px;
+            font-size: 0.9em;
+            margin: 6px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .workflow {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 24px;
+            margin: 40px 0;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .workflow-step {
+            margin: 28px 0;
+            padding: 32px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workflow-step::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #22c55e 0%, #10b981 100%);
+        }
+
+        .workflow-step:hover {
+            transform: translateX(8px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(34, 197, 94, 0.4);
+        }
+
+        .workflow-step strong {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .workflow-step pre {
+            margin-top: 16px;
+            margin-bottom: 12px;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+            margin: 80px 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 80px 60px;
+            margin-top: 100px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 1px;
+            background: var(--primary-gradient);
+        }
+
+        footer p {
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        footer p:first-child {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .highlight {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+
+        .comment {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .content {
+                padding: 60px 40px;
+            }
+
+            header {
+                padding: 80px 40px 60px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 60px 30px 40px;
+            }
+
+            .content {
+                padding: 40px 30px;
+            }
+
+            .graph-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            section {
+                margin-bottom: 60px;
+            }
+
+            h2 {
+                margin-top: 60px;
+            }
+
+            footer {
+                padding: 60px 30px;
+            }
+        }
+
+        /* Smooth scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Art Detection System</h1>
+            <p class="subtitle">Deep Learning Classification with AlexNet Architecture</p>
+        </header>
+
+        <div class="content">
+            <section>
+                <h2>Overview</h2>
+                <p>
+                    This system implements a PyTorch-based deep learning classifier that distinguishes between 
+                    <span class="highlight">AI-generated art</span> and <span class="highlight">human-created art</span>. 
+                    The implementation uses the AlexNet convolutional neural network architecture with transfer learning 
+                    from ImageNet pretrained weights, enabling high-accuracy classification with relatively small datasets.
+                </p>
+                <p>
+                    The system provides a complete pipeline from data organization through model training to inference, 
+                    designed for both research and production deployment scenarios.
+                </p>
+            </section>
+
+            <section>
+                <h2>Example Classification</h2>
+                <div class="image-container">
+                    <img src="test.jpg" alt="AI Generated Test Image">
+                    <p><strong>Test Image (AI-Generated):</strong> This image demonstrates the system's ability to 
+                    identify AI-generated artwork. The model analyzes visual patterns, textures, and compositional 
+                    elements that distinguish synthetic images from human-created art.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Architecture Implementation</h2>
+                
+                <h3>AlexNet Model Definition</h3>
+                <p>The core model architecture is defined in <code>model.py</code>. The AlexNet class implements 
+                a five-layer convolutional feature extractor followed by a three-layer fully connected classifier:</p>
+
+                <pre><code>class AlexNet(nn.Module):
+    def __init__(self, num_classes=1000):
+        super(AlexNet, self).__init__()
+        
+        self.features = nn.Sequential(
+            # Conv1: 3 input channels, 64 output channels
+            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+            
+            # Conv2: 64 -> 192 channels
+            nn.Conv2d(64, 192, kernel_size=5, padding=2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+            
+            # Conv3: 192 -> 384 channels
+            nn.Conv2d(192, 384, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            
+            # Conv4: 384 -> 256 channels
+            nn.Conv2d(384, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            
+            # Conv5: 256 -> 256 channels
+            nn.Conv2d(256, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+        )
+        
+        self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
+        
+        self.classifier = nn.Sequential(
+            nn.Dropout(),
+            nn.Linear(256 * 6 * 6, 4096),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(4096, 4096),
+            nn.ReLU(inplace=True),
+            nn.Linear(4096, num_classes),
+        )</code></pre>
+
+                <div class="code-explanation">
+                    <p><strong>Architecture Explanation:</strong></p>
+                    <p>The <code>features</code> module contains five convolutional layers that progressively extract 
+                    hierarchical visual features. Each convolutional layer is followed by ReLU activation, and 
+                    max-pooling operations reduce spatial dimensions. The <code>classifier</code> module consists 
+                    of three fully connected layers with dropout regularization (50%) to prevent overfitting. 
+                    Adaptive average pooling ensures consistent input size to the classifier regardless of input 
+                    image dimensions.</p>
+                </div>
+
+                <h3>Forward Pass</h3>
+                <pre><code>def forward(self, x):
+    x = self.features(x)      # Extract convolutional features
+    x = self.avgpool(x)       # Adaptive pooling to fixed size
+    x = torch.flatten(x, 1)   # Flatten for fully connected layers
+    x = self.classifier(x)   # Classification
+    return x</code></pre>
+
+                <div class="code-explanation">
+                    <p><strong>Forward Pass Explanation:</strong></p>
+                    <p>The forward method defines the data flow through the network. Input images pass through 
+                    the convolutional feature extractor, are pooled to a fixed spatial size (6x6), flattened 
+                    into a vector, and then processed by the fully connected classifier to produce class logits.</p>
+                </div>
+
+                <h3>Transfer Learning Implementation</h3>
+                <pre><code>def create_alexnet(num_classes, pretrained=False):
+    model = AlexNet(num_classes=num_classes)
+    
+    if pretrained:
+        pretrained_model = models.alexnet(weights=models.AlexNet_Weights.IMAGENET1K_V1)
+        
+        # Copy feature weights
+        model.features.load_state_dict(pretrained_model.features.state_dict())
+        
+        # Copy classifier weights (except last layer)
+        pretrained_classifier = pretrained_model.classifier.state_dict()
+        model_classifier = model.classifier.state_dict()
+        
+        for name, param in pretrained_classifier.items():
+            if name in model_classifier:
+                if model_classifier[name].shape == param.shape:
+                    model_classifier[name] = param
+        
+        model.classifier.load_state_dict(model_classifier)
+    
+    return model</code></pre>
+
+                <div class="code-explanation">
+                    <p><strong>Transfer Learning Explanation:</strong></p>
+                    <p>Transfer learning leverages ImageNet pretrained weights to initialize the model. The 
+                    convolutional feature extractor weights are directly copied, as these layers learn general 
+                    visual features applicable to many tasks. The classifier weights (except the final layer, 
+                    which must match the number of classes) are also transferred, providing a strong initialization 
+                    that accelerates training and improves final performance.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Training Pipeline</h2>
+
+                <h3>Training Loop</h3>
+                <p>The training process iterates through epochs, processing batches of images:</p>
+
+                <pre><code>def train_epoch(model, train_loader, criterion, optimizer, device):
+    model.train()
+    running_loss = 0.0
+    correct = 0
+    total = 0
+    
+    for images, labels in train_loader:
+        images = images.to(device)
+        labels = labels.to(device)
+        
+        # Forward pass
+        optimizer.zero_grad()
+        outputs = model(images)
+        loss = criterion(outputs, labels)
+        
+        # Backward pass
+        loss.backward()
+        optimizer.step()
+        
+        # Statistics
+        running_loss += loss.item()
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+    
+    epoch_loss = running_loss / len(train_loader)
+    epoch_acc = 100 * correct / total
+    return epoch_loss, epoch_acc</code></pre>
+
+                <div class="code-explanation">
+                    <p><strong>Training Loop Explanation:</strong></p>
+                    <p>Each training epoch processes all batches in the training dataset. For each batch: 
+                    (1) images and labels are moved to the computation device (CPU/GPU), (2) gradients 
+                    are zeroed, (3) forward pass computes predictions and loss, (4) backward pass computes 
+                    gradients, (5) optimizer updates model parameters. The function tracks cumulative loss and 
+                    accuracy across the epoch, returning average metrics.</p>
+                </div>
+
+                <h3>Adaptive Learning Rate Scheduling</h3>
+                <pre><code>scheduler = ReduceLROnPlateau(
+    optimizer, 
+    mode='min',      # Minimize validation loss
+    factor=0.5,      # Reduce LR by half when plateau detected
+    patience=5,      # Wait 5 epochs without improvement
+    min_lr=1e-6,     # Minimum learning rate
+    cooldown=2       # Wait 2 epochs after LR reduction
+)
+
+# In training loop:
+scheduler.step(val_loss)  # Adjust based on validation loss</code></pre>
+
+                <div class="code-explanation">
+                    <p><strong>Learning Rate Scheduling Explanation:</strong></p>
+                    <p>The <code>ReduceLROnPlateau</code> scheduler monitors validation loss and automatically 
+                    reduces the learning rate when improvement plateaus. This adaptive approach allows the model 
+                    to make large updates early in training, then fine-tune with smaller learning rates as it 
+                    converges, leading to better final performance than fixed learning rates.</p>
+                </div>
+
+                <h3>Model Checkpointing</h3>
+                <pre><code>def save_checkpoint(model, optimizer, epoch, loss, acc, save_path):
+    torch.save({
+        'epoch': epoch,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'loss': loss,
+        'acc': acc,
+    }, save_path)
+
+# Save best model based on validation accuracy
+if val_acc > best_val_acc:
+    best_val_acc = val_acc
+    save_checkpoint(model, optimizer, epoch, val_loss, val_acc, 
+                    "checkpoints/best_model.pth")</code></pre>
+
+                <div class="code-explanation">
+                    <p><strong>Checkpointing Explanation:</strong></p>
+                    <p>Checkpoints save the complete training state, including model weights, optimizer state, 
+                    and training metrics. This enables resuming training from a specific point and ensures the 
+                    best-performing model (by validation accuracy) is preserved. The best model checkpoint is 
+                    automatically updated whenever validation accuracy improves.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Training Progress Visualization</h2>
+                <p>The system generates comprehensive training metrics and visualizations. The following graphs 
+                demonstrate model performance over training epochs:</p>
+
+                <div class="graph-grid">
+                    <div class="graph-item">
+                        <img src="graphs/training_graphs.png" alt="Training Graphs Overview">
+                        <h4>Complete Training Overview</h4>
+                        <p>Comprehensive visualization of loss, accuracy, and learning rate dynamics</p>
+                    </div>
+                    <div class="graph-item">
+                        <img src="graphs/loss_curve.png" alt="Loss Curve">
+                        <h4>Loss Curves</h4>
+                        <p>Training and validation loss convergence over epochs</p>
+                    </div>
+                    <div class="graph-item">
+                        <img src="graphs/accuracy_curve.png" alt="Accuracy Curve">
+                        <h4>Accuracy Curves</h4>
+                        <p>Training and validation accuracy improvement trajectory</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Inference Implementation</h2>
+
+                <h3>Image Preprocessing</h3>
+                <p>Input images are preprocessed to match the training distribution:</p>
+
+                <pre><code>transform = transforms.Compose([
+    transforms.Resize((224, 224)),           # Resize to model input size
+    transforms.ToTensor(),                    # Convert to tensor [0,1]
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],          # ImageNet mean
+        std=[0.229, 0.224, 0.225]            # ImageNet std
+    )
+])
+
+image = Image.open(image_path).convert('RGB')
+image_tensor = transform(image).unsqueeze(0)  # Add batch dimension</code></pre>
+
+                <div class="code-explanation">
+                    <p><strong>Preprocessing Explanation:</strong></p>
+                    <p>Images are resized to 224x224 pixels (AlexNet's standard input size), converted to 
+                    PyTorch tensors, and normalized using ImageNet statistics. This normalization matches the 
+                    distribution the model was trained on. The <code>unsqueeze(0)</code> operation adds a batch 
+                    dimension, converting shape [C, H, W] to [1, C, H, W] for batch processing.</p>
+                </div>
+
+                <h3>Model Inference</h3>
+                <pre><code>model.eval()  # Set to evaluation mode
+
+with torch.no_grad():  # Disable gradient computation
+    outputs = model(image_tensor)
+    probabilities = F.softmax(outputs, dim=1)
+    confidence, predicted = torch.max(probabilities, 1)
+
+predicted_class = class_names[predicted.item()]
+confidence_score = confidence.item()</code></pre>
+
+                <div class="code-explanation">
+                    <p><strong>Inference Explanation:</strong></p>
+                    <p>During inference, the model is set to evaluation mode (<code>model.eval()</code>), which 
+                    disables dropout and batch normalization updates. The <code>torch.no_grad()</code> context 
+                    prevents gradient computation, reducing memory usage and speeding up inference. The raw 
+                    logits are converted to probabilities via softmax, and the class with highest probability 
+                    is selected as the prediction.</p>
+                </div>
+
+                <h3>Complete Inference Function</h3>
+                <pre><code>def predict(model, image_tensor, class_names, device):
+    image_tensor = image_tensor.to(device)
+    
+    with torch.no_grad():
+        outputs = model(image_tensor)
+        probabilities = F.softmax(outputs, dim=1)
+        confidence, predicted = torch.max(probabilities, 1)
+    
+    predicted_class = class_names[predicted.item()]
+    confidence_score = confidence.item()
+    
+    # Get top 3 predictions
+    top3_probs, top3_indices = torch.topk(probabilities, min(3, len(class_names)))
+    
+    return {
+        'predicted_class': predicted_class,
+        'confidence': confidence_score,
+        'top3': [(class_names[idx], prob.item()) 
+                for prob, idx in zip(top3_probs[0], top3_indices[0])]
+    }</code></pre>
+
+                <div class="code-explanation">
+                    <p><strong>Complete Inference Explanation:</strong></p>
+                    <p>This function encapsulates the full inference pipeline: moves data to the appropriate device, 
+                    performs forward pass, computes probabilities, and extracts the top predictions. The function 
+                    returns a dictionary containing the predicted class, confidence score, and top-3 predictions 
+                    with their probabilities, providing comprehensive classification results.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Data Pipeline</h2>
+
+                <h3>Data Augmentation</h3>
+                <p>Training data is augmented to improve model generalization:</p>
+
+                <pre><code>train_transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.RandomHorizontalFlip(p=0.5),      # 50% flip probability
+    transforms.RandomRotation(degrees=15),       # ±15 degree rotation
+    transforms.ColorJitter(
+        brightness=0.2,                          # Brightness variation
+        contrast=0.2                             # Contrast variation
+    ),
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
+    )
+])</code></pre>
+
+                <div class="code-explanation">
+                    <p><strong>Data Augmentation Explanation:</strong></p>
+                    <p>Data augmentation artificially expands the training dataset by applying random transformations. 
+                    Horizontal flips preserve semantic meaning while adding variation. Random rotations and color 
+                    jittering increase robustness to lighting and orientation changes. These augmentations help 
+                    prevent overfitting and improve generalization to unseen images.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Key Features</h2>
+                
+                <div class="feature-box">
+                    <h3>Modular Architecture</h3>
+                    <p>Separate modules for data loading, model definition, training, and inference enable 
+                    easy customization and extension of the system.</p>
+                </div>
+
+                <div class="feature-box">
+                    <h3>Comprehensive Monitoring</h3>
+                    <p>Real-time CSV logging of training metrics (loss, accuracy, learning rate) enables 
+                    detailed analysis and visualization of training dynamics.</p>
+                </div>
+
+                <div class="feature-box">
+                    <h3>Transfer Learning</h3>
+                    <p>Leverages ImageNet pretrained weights for superior performance with smaller datasets, 
+                    reducing training time and data requirements.</p>
+                </div>
+
+                <div class="feature-box">
+                    <h3>Production Ready</h3>
+                    <p>Includes error handling, automatic checkpointing, device management (CPU/GPU), and 
+                    comprehensive logging for reliable deployment.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Usage Workflow</h2>
+                
+                <div class="workflow">
+                    <div class="workflow-step">
+                        <strong>Step 1: Organize Data</strong>
+                        <pre><code>python organize_data.py --source unsorteddata --val-split 0.2</code></pre>
+                        <p>Automatically structures training and validation datasets from unsorted image directories.</p>
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 2: Train Model</strong>
+                        <pre><code>python train.py --data-root data --epochs 50 --batch-size 32</code></pre>
+                        <p>Trains the AlexNet model with specified hyperparameters, saving checkpoints and metrics.</p>
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 3: Generate Visualizations</strong>
+                        <pre><code>python graph.py --csv-file training_log.csv</code></pre>
+                        <p>Creates training progress graphs from logged CSV metrics.</p>
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 4: Classify Images</strong>
+                        <pre><code>python test_image.py test.jpg</code></pre>
+                        <p>Performs inference on new images using the trained model.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Technical Specifications</h2>
+                <ul>
+                    <li><strong>Framework:</strong> PyTorch 2.0+</li>
+                    <li><strong>Architecture:</strong> AlexNet (5 conv layers, 3 FC layers)</li>
+                    <li><strong>Input Size:</strong> 224×224 RGB images</li>
+                    <li><strong>Output:</strong> Binary classification (AI-generated / Real art)</li>
+                    <li><strong>Optimizer:</strong> SGD with momentum (0.9), weight decay (0.0005)</li>
+                    <li><strong>Loss Function:</strong> CrossEntropyLoss</li>
+                    <li><strong>Supported Formats:</strong> <span class="badge">JPG</span> <span class="badge">PNG</span> <span class="badge">JPEG</span> <span class="badge">BMP</span> <span class="badge">TIFF</span></li>
+                </ul>
+            </section>
+        </div>
+
+        <footer>
+            <p><strong>AI Art Detection System</strong></p>
+            <p>PyTorch Implementation | AlexNet Architecture | Transfer Learning</p>
+            <p style="margin-top: 15px; font-size: 0.9em; color: #6e7681;">
+                Deep learning system for automated classification of AI-generated versus human-created artwork
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
