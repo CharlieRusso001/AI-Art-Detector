@@ -3,6 +3,5 @@ best_model.pth
 croc.png
 data/
 unsorteddata/
-graphs/
 gamma.txt
 training_log.csv
